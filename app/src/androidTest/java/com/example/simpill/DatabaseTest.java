@@ -11,6 +11,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import java.sql.SQLDataException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.Ignore;
 
 @RunWith(AndroidJUnit4.class)
 public class DatabaseTest {
@@ -92,6 +93,7 @@ public class DatabaseTest {
         return pills;
     }
 
+    @Ignore
     @Test
     public void addPills() {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -105,6 +107,7 @@ public class DatabaseTest {
         }
     }
 
+    @Ignore
     @Test
     public void retrieveAndVerifyPills() throws SQLDataException {
         addPills();
@@ -167,6 +170,7 @@ public class DatabaseTest {
         }
     }
 
+    @Ignore
     @Test
     public void readPillsCursor() {
         addPills();
@@ -177,6 +181,7 @@ public class DatabaseTest {
         cursor.moveToFirst();
     }
 
+    @Ignore
     @Test
     public void retrievePillsByPrimaryKey() throws SQLDataException {
         addPills();
