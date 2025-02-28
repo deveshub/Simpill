@@ -103,4 +103,9 @@ public class SharedPrefs {
         return context.getSharedPreferences(SOUND_ON_FILENAME, Context.MODE_PRIVATE)
                 .getBoolean(SOUND_ON_TAG, true);
     }
+
+    public boolean getDarkModePref() {
+        return context.getSharedPreferences("dark_mode", Context.MODE_PRIVATE)
+                .getBoolean("dark_mode", false);
+    }
 }

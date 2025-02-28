@@ -46,7 +46,7 @@ public class Pill {
             Uri.parse("android.resource://com.winston69.simpill/" + R.raw.eas_alarm);
 
     private final ContentValues contentValues = new ContentValues(13);
-    private final DateTimeManager dateTimeManager = new DateTimeManager();
+    private DateTimeManager dateTimeManager;
 
     private String name = "";
     private int primaryKey = 0;
@@ -81,6 +81,37 @@ public class Pill {
             int alarmType,
             int alarmsSet,
             int bottleColor) {
+        this(
+                name,
+                timesArray,
+                startDate,
+                stockupDate,
+                customAlarmUri,
+                frequency,
+                taken,
+                timeTaken,
+                supply,
+                alarmType,
+                alarmsSet,
+                bottleColor,
+                new DateTimeManager());
+    }
+
+    public Pill(
+            String name,
+            String[] timesArray,
+            String startDate,
+            String stockupDate,
+            Uri customAlarmUri,
+            int frequency,
+            int taken,
+            String timeTaken,
+            int supply,
+            int alarmType,
+            int alarmsSet,
+            int bottleColor,
+            DateTimeManager dateTimeManager) {
+        this.dateTimeManager = dateTimeManager;
         setName(name);
         setTimesArray(timesArray);
         setAlarmReminderTimes();
@@ -156,6 +187,34 @@ public class Pill {
         updatePillInDatabase(context);
     }
 
+    public void scheduleSnoozeNotification(Context context, long snoozeTime) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        // Create a unique request code for snooze alarm
+        int snoozeRequestCode = getPrimaryKey() * 10 * 10 * 10 + 999;
+
+        @SuppressLint("InlinedApi")
+        PendingIntent snoozePendingIntent =
+                PendingIntent.getBroadcast(
+                        context,
+                        snoozeRequestCode,
+                        new Intent(context, ReceiverPillAlarm.class)
+                                .putExtra(PRIMARY_KEY_INTENT_KEY_STRING, getPrimaryKey())
+                                .putExtra(NOTIFICATION_ID_INTENT_KEY_STRING, snoozeRequestCode),
+                        PendingIntent.FLAG_IMMUTABLE);
+
+        // Cancel any existing snooze alarm
+        alarmManager.cancel(snoozePendingIntent);
+
+        // Schedule new snooze alarm
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP, snoozeTime, snoozePendingIntent);
+        } else {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, snoozeTime, snoozePendingIntent);
+        }
+    }
+
     public void sendPillNotification(Context context) {
         NotificationManagerCompat pillNotificationManagerCompat =
                 NotificationManagerCompat.from(context);
@@ -176,9 +235,18 @@ public class Pill {
                 new Intent(context, MainActivity.class)
                         .putExtra(PILL_TAKEN_VIA_NOTIFICATION_INTENT_KEY, getPrimaryKey());
         @SuppressLint("InlinedApi")
-        PendingIntent pendingIntent =
+        PendingIntent openPendingIntent =
                 PendingIntent.getActivity(
                         context, primaryKey, openMainIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        // Create snooze intent
+        Intent snoozeIntent =
+                new Intent(context, PillAlarmDisplay.class)
+                        .putExtra(PRIMARY_KEY_INTENT_KEY_STRING, getPrimaryKey());
+        @SuppressLint("InlinedApi")
+        PendingIntent snoozePendingIntent =
+                PendingIntent.getActivity(
+                        context, primaryKey * 100, snoozeIntent, PendingIntent.FLAG_IMMUTABLE);
 
         pillReminderNotification =
                 new NotificationCompat.Builder(context, Simpill.PILL_REMINDER_CHANNEL)
@@ -198,15 +266,19 @@ public class Pill {
                         .setVibrate(AudioHelper.vibratorPattern)
                         .setPriority(NotificationCompat.PRIORITY_MAX)
                         .setOngoing(new SharedPrefs(context).getStickyNotificationsPref())
-                        .setContentIntent(pendingIntent)
+                        .setContentIntent(openPendingIntent)
                         .addAction(
                                 R.mipmap.ic_launcher,
                                 context.getString(R.string.open),
-                                pendingIntent)
+                                openPendingIntent)
+                        .addAction(
+                                R.mipmap.ic_launcher,
+                                context.getString(R.string.snooze),
+                                snoozePendingIntent)
                         .addAction(
                                 R.mipmap.ic_launcher,
                                 context.getString(R.string.dismiss),
-                                pendingIntent)
+                                openPendingIntent)
                         .build();
 
         if (getTaken() == PILL_TAKEN_VALUE) {
@@ -224,9 +296,9 @@ public class Pill {
                             .setCategory(NotificationCompat.CATEGORY_REMINDER)
                             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                             .setOngoing(false)
-                            .setContentIntent(pendingIntent)
-                            .setFullScreenIntent(pendingIntent, true)
-                            .addAction(R.mipmap.ic_launcher, "Open", pendingIntent)
+                            .setContentIntent(openPendingIntent)
+                            .setFullScreenIntent(openPendingIntent, true)
+                            .addAction(R.mipmap.ic_launcher, "Open", openPendingIntent)
                             .build();
         }
 
@@ -496,46 +568,6 @@ public class Pill {
     public long[] getAlarmReminderTimes() {
         return this.alarmReminderTimes;
     }
-
-    //            @SuppressLint("InlinedApi")
-    //            PendingIntent pillAlarmPendingIntent =
-    //                    PendingIntent.getBroadcast(
-    //                            context,
-    //                            pill.getAlarmRequestCode(),
-    //                            new Intent(context, ReceiverPillAlarm.class)
-    //                                    .putExtra(PRIMARY_KEY_INTENT_KEY_STRING,
-    // pill.getPrimaryKey())
-    //                                    .putExtra(
-    //                                            context.getString(R.string.notification_id),
-    //                                            pill.getAlarmRequestCode()),
-    //                            PendingIntent.FLAG_IMMUTABLE);
-
-    // cancel any previous alarms before creating new ones
-    //            alarmManager.cancel(pillAlarmPendingIntent);
-    //
-    //            long pillReminderTime =
-    //                    dateTimeManager.convertTimeToCurrentDateTimeInMillis(reminderTime);
-    //            while (pillReminderTime <= System.currentTimeMillis()) {
-    //                pillReminderTime = pillReminderTime + AlarmManager.INTERVAL_DAY;
-    //            }
-    //
-    //            if (frequency <= 1) {
-    //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-    //                    alarmManager.setExactAndAllowWhileIdle(
-    //                            AlarmManager.RTC_WAKEUP, pillReminderTime,
-    // pillAlarmPendingIntent);
-    //                } else {
-    //                    alarmManager.setExact(
-    //                            AlarmManager.RTC_WAKEUP, pillReminderTime,
-    // pillAlarmPendingIntent);
-    //                }
-    //            } else {
-    //                alarmManager.setRepeating(
-    //                        AlarmManager.RTC_WAKEUP,
-    //                        pillReminderTime,
-    //                        AlarmManager.INTERVAL_DAY * frequency,
-    //                        pillAlarmPendingIntent);
-    //            }
 
     public String getName() {
         return name;

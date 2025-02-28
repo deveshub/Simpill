@@ -228,4 +228,8 @@
     <string name="refill_dialog_msg">Select a refill date using the calendar below.</string>
     <string name="past_date_dialog_title">Hmm...</string>
     <string name="past_date_dialog_message">Unless you have access to a TARDIS, the date cannot be set in the past.</string> <!--1st param is current time e.g. 16:20-->
+    <string name="snooze">Snooze</string>
+    <string name="snooze_dialog_title">Snooze Reminder</string>
+    <string name="snooze_minutes">Snooze for %d minutes</string>
+    <string name="custom_minutes_hint">Enter minutes</string>
 </resources>

@@ -71,4 +71,10 @@ public class AudioHelper {
     public Vibrator getVibrator() {
         return (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
+
+    public static void playAlarmSound(Context context) {
+        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.eas_alarm);
+        mediaPlayer.setLooping(true);
+        mediaPlayer.start();
+    }
 }

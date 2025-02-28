@@ -2,7 +2,6 @@
 package com.example.simpill;
 
 import static com.example.simpill.Pill.DEFAULT_ALARM_URI;
-import static com.example.simpill.Pill.PRIMARY_KEY_INTENT_KEY_STRING;
 
 import android.annotation.SuppressLint;
 import android.app.KeyguardManager;
@@ -42,21 +41,58 @@ public class PillAlarmDisplay extends AppCompatActivity {
 
     private final SharedPrefs sharedPrefs = new SharedPrefs(this);
 
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        audioHelper = new AudioHelper(this);
-        intent = getIntent();
-        pill =
-                new DatabaseHelper(this)
-                        .getPill(intent.getIntExtra(PRIMARY_KEY_INTENT_KEY_STRING, -1));
-        setContentViewBasedOnThemeSetting();
-        initVibratorAndAlarm();
-        initWidgets();
-        createOnClickListeners();
+        setContentView(R.layout.activity_pill_alarm_display);
+
+        // Get pill primary key from intent
+        int primaryKey = getIntent().getIntExtra(Pill.PRIMARY_KEY_INTENT_KEY_STRING, -1);
+        if (primaryKey == -1) {
+            finish();
+            return;
+        }
+
+        // Get pill from database
+        pill = new DatabaseHelper(this).getPill(primaryKey);
+        if (pill == null) {
+            finish();
+            return;
+        }
+
+        // Initialize UI elements
+        pillName = findViewById(R.id.pill_name_textview);
+        pillTime = findViewById(R.id.pill_time_textview);
+        takenBtn = findViewById(R.id.taken_pill_alarm_btn);
+        dismissBtn = findViewById(R.id.dismiss_alarm_btn);
+
+        // Set pill name
+        pillName.setText(pill.getName());
+
+        // Set button click listeners
+        takenBtn.setOnClickListener(
+                v -> {
+                    pill.takePill(this);
+                    pill.deleteActiveNotifications(this);
+                    vibrator.cancel();
+                    stopAlarmAndVibrator();
+                    takenPlayer = MediaPlayer.create(PillAlarmDisplay.this, R.raw.correct);
+                    takenPlayer.start();
+                    finish();
+                    startActivity(new Intent(this, MainActivity.class));
+                });
+        dismissBtn.setOnClickListener(
+                v -> {
+                    stopAlarmAndVibrator();
+                    finish();
+                    startActivity(new Intent(this, MainActivity.class));
+                });
+
+        // Play alarm sound and vibrate
+        AudioHelper.playAlarmSound(this);
 
         DateTimeManager dateTimeManager = new DateTimeManager();
 
-        pillName.setText(pill.getName());
         String currentTime =
                 this.getString(
                         R.string.its_time,
