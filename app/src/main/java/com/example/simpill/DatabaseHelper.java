@@ -205,7 +205,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SUPPLY)),
                 cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ALARM_TYPE)),
                 cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ALARMSSET)),
-                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOTTLECOLOR))
-        );
+                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOTTLECOLOR)));
     }
 }

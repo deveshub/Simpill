@@ -71,8 +71,10 @@ public class MainActivity extends AppCompatActivity implements Pill.PillListener
         boolean newPillAdded = intent.hasExtra(NEW_PILL_INTENT_KEY);
         int pk = intent.getIntExtra(NEW_PILL_INTENT_KEY, -1);
 
-        if(newPillAdded && pk != -1) {
-            Pill[] newPillArray = arrayHelper.addPillToPillArray(pills, myDatabase.getPill(intent.getIntExtra(NEW_PILL_INTENT_KEY, -1)));
+        if (newPillAdded && pk != -1) {
+            Pill[] newPillArray =
+                    arrayHelper.addPillToPillArray(
+                            pills, myDatabase.getPill(intent.getIntExtra(NEW_PILL_INTENT_KEY, -1)));
             pills = newPillArray;
             myAdapter.pills = newPillArray;
             myAdapter.notifyItemInserted(newPillArray.length - 1);

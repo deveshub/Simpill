@@ -483,10 +483,11 @@ public class Dialogs extends AppCompatDialogFragment {
                             .show();
                 });
 
-        addBtn.setOnClickListener(view -> {
-            int currentAmount = Integer.parseInt(enterAmountEditText.getText().toString());
-            enterAmountEditText.setText(String.valueOf(currentAmount + 1));
-        });
+        addBtn.setOnClickListener(
+                view -> {
+                    int currentAmount = Integer.parseInt(enterAmountEditText.getText().toString());
+                    enterAmountEditText.setText(String.valueOf(currentAmount + 1));
+                });
         minusBtn.setOnClickListener(
                 view -> {
                     int currentAmount = Integer.parseInt(enterAmountEditText.getText().toString());

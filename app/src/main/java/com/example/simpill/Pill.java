@@ -29,7 +29,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
-
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -309,7 +308,7 @@ public class Pill {
 
     public void setAlarm(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        
+
         for (int index = 0; index < getAlarmReminderTimes().length; index++) {
             int frequency = getFrequency();
             int requestCode = getAlarmRequestCodes()[index];
@@ -459,7 +458,7 @@ public class Pill {
 
         alarmManager.cancel(pillSupplyPendingIntent);
     }
-    
+
     public Pill addToDatabase(Context context) {
         setContentValues();
         setAlarmRequestCodes();
@@ -548,9 +547,7 @@ public class Pill {
     }
 
     public int getPrimaryKey() {
-        if (primaryKey <= 0) {
-
-        }
+        if (primaryKey <= 0) {}
 
         return this.primaryKey;
     }

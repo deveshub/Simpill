@@ -53,11 +53,12 @@ public class Settings extends AppCompatActivity implements Dialogs.SettingsDialo
     private void createOnClickListeners() {
         Dialogs getDialogs = new Dialogs(this);
 
-        deleteAllBtn.setOnClickListener(view -> {
-            Dialog dialog = getDialogs.getDatabaseDeletionDialog();
-            dialog.show();
-            settingsChanged = true;
-        });
+        deleteAllBtn.setOnClickListener(
+                view -> {
+                    Dialog dialog = getDialogs.getDatabaseDeletionDialog();
+                    dialog.show();
+                    settingsChanged = true;
+                });
         backButton.setOnClickListener(
                 v -> {
                     if (settingsChanged) {
