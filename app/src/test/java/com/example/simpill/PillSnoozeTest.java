@@ -18,15 +18,18 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockitoJUnit;
+import org.junit.rules.TestRule;
+import org.mockito.MockitoAnnotations;
+import org.junit.Ignore;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
-@Ignore("Test needs to be fixed - temporarily disabled")
 public class PillSnoozeTest {
 
     @Mock private Context mockContext;
@@ -48,16 +51,8 @@ public class PillSnoozeTest {
 
     @Before
     public void setUp() {
+
         MockitoAnnotations.openMocks(this);
-
-        // Mock Context and AlarmManager
-        when(mockContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mockAlarmManager);
-
-        // Mock SharedPreferences
-        when(mockContext.getSharedPreferences(anyString(), anyInt())).thenReturn(mockSharedPreferences);
-        when(mockSharedPreferences.edit()).thenReturn(mockEditor);
-        when(mockEditor.putBoolean(anyString(), anyBoolean())).thenReturn(mockEditor);
-        doNothing().when(mockEditor).apply();
 
         // Mock DateTimeManager
         when(mockDateTimeManager.formatLongAsTimeString(anyLong())).thenReturn("10:00 AM");
@@ -69,6 +64,15 @@ public class PillSnoozeTest {
         when(mockDateTimeManager.getCurrentCalendarDayMonthYear())
                 .thenReturn(new int[] {20, 3, 2024});
         when(mockDateTimeManager.addMonthToDateString(anyString())).thenReturn("2023-02-01");
+
+        // Mock Context and AlarmManager
+        when(mockContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mockAlarmManager);
+
+        // Mock SharedPreferences
+        when(mockContext.getSharedPreferences(anyString(), anyInt())).thenReturn(mockSharedPreferences);
+        when(mockSharedPreferences.edit()).thenReturn(mockEditor);
+        when(mockEditor.putBoolean(anyString(), anyBoolean())).thenReturn(mockEditor);
+        doNothing().when(mockEditor).apply();
 
         // Initialize test pill with DateTimeManager
         testPill =
@@ -88,12 +92,12 @@ public class PillSnoozeTest {
                         mockDateTimeManager);
         testPill.setPrimaryKey(1);
 
+        // Mock database helper behavior
+        when(mockDatabaseHelper.getPill(anyInt())).thenReturn(testPill);
+
         // Initialize receiver and inject mocked database helper
         receiverPillSnooze = new ReceiverPillSnooze();
         receiverPillSnooze.setDatabaseHelper(mockDatabaseHelper);
-
-        // Mock database helper behavior
-        when(mockDatabaseHelper.getPill(anyInt())).thenReturn(testPill);
     }
 
     @Test
@@ -116,7 +120,6 @@ public class PillSnoozeTest {
     }
 
     @Test
-    @Ignore("Test needs to be fixed - temporarily disabled")
     public void testReceiverPillSnoozeOnReceive() {
         // Create mock Intent with test data
         Intent mockIntent = new Intent();
@@ -131,7 +134,6 @@ public class PillSnoozeTest {
     }
 
     @Test
-    @Ignore("Test needs to be fixed - temporarily disabled")
     public void testSnoozeDialogCreation() {
         // Mock SharedPreferences for dark mode
         when(mockSharedPreferences.getBoolean(eq("dark_mode"), anyBoolean())).thenReturn(false);
@@ -141,7 +143,6 @@ public class PillSnoozeTest {
     }
 
     @Test
-    @Ignore("Test needs to be fixed - temporarily disabled")
     public void testInvalidPrimaryKeyHandling() {
         Intent mockIntent = new Intent();
         mockIntent.putExtra(Pill.PRIMARY_KEY_INTENT_KEY_STRING, -1);
@@ -156,7 +157,6 @@ public class PillSnoozeTest {
     }
 
     @Test
-    @Ignore("Test needs to be fixed - temporarily disabled")
     public void testDefaultSnoozeTime() {
         Intent mockIntent = new Intent();
         mockIntent.putExtra(Pill.PRIMARY_KEY_INTENT_KEY_STRING, 1);
